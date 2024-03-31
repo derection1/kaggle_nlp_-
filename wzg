@@ -297,8 +297,6 @@ class ScoreRegressor:
                 batch_size: int,
                 fold: int,
                ):
-        """predict content score"""
-        
         test_df[self.input_col] = test_df.apply(self.concatenate_with_sep_token, axis=1)
 
         test_dataset = Dataset.from_pandas(test_df[[self.input_col]], preserve_index=False) 
@@ -308,7 +306,6 @@ class ScoreRegressor:
         model.load_state_dict(torch.load(f"{self.model_dir}/{self.model_name}.pth"))
         model.eval()
         
-        # e.g. "bert/fold_0/"
         model_fold_dir = '/kaggle/working/'
         test_args = TrainingArguments(
             output_dir=model_fold_dir,
@@ -319,7 +316,6 @@ class ScoreRegressor:
 #             fp16=True,
             auto_find_batch_size=True,
         )
-        # init trainer
         infer_content = Trainer(
                       model = model, 
                       tokenizer=self.tokenizer,
@@ -353,7 +349,7 @@ def predict(
     attention_probs_dropout_prob: float,
     max_length : int
     ):
-    """predict using mean folds"""
+ #交叉验证
     
     columns = list(test_df.columns.values)
 
@@ -537,7 +533,6 @@ for target in targets:
     trues = []
     
     for fold, model in enumerate(models):
-        # ilocで取り出す行を指定
         X_eval_cv = train[train["fold"] == fold].drop(columns=drop_columns)
         y_eval_cv = train[train["fold"] == fold][target]
 
@@ -624,7 +619,6 @@ print(f"mcrmse : {sum(rmses) / len(rmses)}")
 #         trues = []
 
 #         for fold, model in enumerate(models):
-#             # ilocで取り出す行を指定
 #             X_eval_cv = train[train["fold"] == fold].drop(columns=drop_columns)
 #             y_eval_cv = train[train["fold"] == fold][target]
 
